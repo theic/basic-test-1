@@ -10,12 +10,12 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/list', (req: Request, res: Response) => {
     try {
         const result = allRockets.sort((a, b) => {
-            const nameA = a.toLocaleString();
-            const nameB = b.toLocaleString();
-            if (nameA > nameB) {
+            const nameA = a.toLowerCase();
+            const nameB = b.toLowerCase();
+            if (nameA < nameB) {
                 return -1;
             }
-            if (nameA < nameB) {
+            if (nameA > nameB) {
                 return 1;
             }
             return 0;
@@ -69,7 +69,7 @@ app.post('/add', (req: Request, res: Response) => {
     }
 });
 
-app.get('/', (req: Request, res: Response) => {
+app.get('*', (req: Request, res: Response) => {
     res.sendStatus(404);
 });
 
