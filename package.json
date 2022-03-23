@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "build": "tsc",
-        "serve:demo": "node dist/js/index",
-        "serve:server": "node dist/js/server",
+        "serve:demo": "node dist/js/core/index",
+        "serve:server": "node dist/js/server/server",
         "start:demo": "npm run build && npm run serve:demo",
         "start:server": "npm run build && npm run serve:server"
     },
