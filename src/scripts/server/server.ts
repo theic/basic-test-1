@@ -1,13 +1,18 @@
-import express, { Request, Response } from 'express';
+import express, { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 
 const app = express();
 const port = process.env.PORT || 2004;
 const allRockets = ['SpaceXRocket', 'NasaRocket', 'MilitaryRocket'];
 
+const errorMiddleware: ErrorRequestHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+    const errorMsg = (err as Error).message || 'HTTP error';
+    res.status(500).send({ errorMsg });
+};
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/list', (req: Request, res: Response) => {
+app.get('/list', (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = allRockets.sort((a, b) => {
             const nameA = a.toLowerCase();
@@ -23,12 +28,11 @@ app.get('/list', (req: Request, res: Response) => {
 
         res.send(result);
     } catch (err) {
-        const errorMsg = (err as Error).message || 'HTTP error';
-        res.status(500).send({ errorMsg });
+        next(err);
     }
 });
 
-app.get('/:rocketName', (req: Request, res: Response) => {
+app.get('/:rocketName', (req: Request, res: Response, next: NextFunction) => {
     try {
         const index = allRockets.map(v => v.toLowerCase())
             .indexOf(req.params.rocketName?.toLowerCase());
@@ -42,14 +46,12 @@ app.get('/:rocketName', (req: Request, res: Response) => {
         }
 
         res.sendStatus(404);
-
     } catch (err) {
-        const errorMsg = (err as Error).message || 'HTTP error';
-        res.status(500).send({ errorMsg });
+        next(err);
     }
 });
 
-app.post('/add', (req: Request, res: Response) => {
+app.post('/add', (req: Request, res: Response, next: NextFunction) => {
     try {
         const name = req.body.name;
 
@@ -62,16 +64,16 @@ app.post('/add', (req: Request, res: Response) => {
 
         allRockets.push(name);
         res.sendStatus(200);
-
     } catch (err) {
-        const errorMsg = (err as Error).message || 'HTTP error';
-        res.status(500).send({ errorMsg });
+        next(err);
     }
 });
 
-app.get('*', (req: Request, res: Response) => {
+app.use('*', (req: Request, res: Response) => {
     res.sendStatus(404);
 });
+
+app.use(errorMiddleware);
 
 app.listen(port, () => {
     console.log(`Started listening to ${port}`)
